@@ -1,0 +1,3 @@
+FROM alpine
+
+apk add nginx nginx-mod-rtmp bash
