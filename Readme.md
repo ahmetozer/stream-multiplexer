@@ -42,7 +42,8 @@ After deploying server, you have to change settings in OBS.
 
 1. Select service to custom.
 
-1. Enter your server address. The scheme will be `rtmp://your.domain/live` or `rtmp://198.51.100.1/live`.
+1. Enter your server address. If you run container at remote, the scheme will be `rtmp://your.domain/live` or `rtmp://198.51.100.1/live`.  
+If you run at local, you can use `rtmp://localhost/live` as server address in OBS.
 
 1. Stream key is given by Multiplexer Stream Server. If you define custom key on server, please enter same key to obs.
 

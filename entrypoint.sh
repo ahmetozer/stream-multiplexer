@@ -14,22 +14,28 @@ cl_red='\033[0;31m'
 cl_nc='\033[0m'
 cl_cy='\e[36m'
 cl_wh='\e[97m'
+cl_lm='\e[95m'
+cl_lg='\e[92m'
 
 stream_servers=("twitch" "youtube")
 if [ -z "$stream_key" ]; then
     stream_key=$(tr </dev/urandom -dc A-Za-z0-9 | head -c${1:-32})
-    echo -e "\tStream key is ${cl_wh}${stream_key}${cl_nc}"
-
+    echo -e "\t${cl_cy}Multiplexer${cl_nc} stream key is:\t${cl_lg}${stream_key}${cl_nc}"
+else
+    echo -e "\t${cl_cy}Multiplexer${cl_nc} stream key specified by user:\t${cl_lg}${stream_key:0:4}...${stream_key:$((${#stream_key}-4))}${cl_nc}"
 fi
 
 rtmp_port=${rtmp_port-1935}
 stream_count=0
 for stream_server in "${stream_servers[@]}"; do
     if [ ! -z "${!stream_server}" ]; then
-        echo -e "\t${cl_cy}${stream_server}${cl_nc} stream key detected ${!stream_server}"
+        remote_stream_key=${!stream_server}
+        echo -e "\t${cl_cy}${stream_server}${cl_nc} stream key detected:\t${cl_lm}${remote_stream_key:0:4}...${remote_stream_key:$((${#remote_stream_key}-4))}${cl_nc}"
         stream_count=$((stream_count + 1))
     fi
 done
+
+unset remote_stream_key
 
 if [ $stream_count -lt 1 ]; then
     echo -e "\t${cl_red}No stream key is defined.${cl_nc}"
