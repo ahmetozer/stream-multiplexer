@@ -2,7 +2,7 @@ name: Build and publish container
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   ghr_push:
@@ -10,17 +10,20 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v2
 
-      - name: Build container image
-        run: |
-          IMAGE_ID=$(echo ghcr.io/${{ github.repository }} | tr '[A-Z]' '[a-z]')
-          docker build . --tag $IMAGE_ID
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-      - name: Log-in ghcr.io
-        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Push container image to ghcr.io
+      - name: Log-in to ghcr.io
+        run: echo "${{ secrets.GHCR_LOGIN }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push container image
         run: |
           IMAGE_ID=$(echo ghcr.io/${{ github.repository }} | tr '[A-Z]' '[a-z]')
 
@@ -32,9 +35,9 @@ jobs:
 
           # when the branch is master, replace master with latest
           [ "$VERSION" == "master" ] && VERSION=latest
-
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_ID $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker buildx build --push \
+          --tag $IMAGE_ID:$VERSION \
+          --platform linux/amd64,linux/arm/v7,linux/arm64 .
